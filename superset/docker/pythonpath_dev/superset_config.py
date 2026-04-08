@@ -30,10 +30,9 @@ from flask_caching.backends.filesystemcache import FileSystemCache
 logger = logging.getLogger()
 
 def my_first_macro():
-    x = 5
-
-    logger.info("HELLO, IT'S ME!")
-
+    from flask import session
+    x = session["locale"]
+    logger.info(f"session language is: {x}")
     return x
 
 JINJA_CONTEXT_ADDONS = {
@@ -117,12 +116,13 @@ class CeleryConfig:
 
 CELERY_CONFIG = CeleryConfig
 
-<<<<<<< HEAD
-FEATURE_FLAGS = {"ALERT_REPORTS": True, "DATASET_FOLDERS": True}
-=======
-FEATURE_FLAGS = {"ALERT_REPORTS": True,
-                  "ENABLE_TEMPLATE_PROCESSING": True}
->>>>>>> my-branch
+# Исправленный блок FEATURE_FLAGS (без конфликта Git)
+FEATURE_FLAGS = {
+    "ALERT_REPORTS": True,
+    "DATASET_FOLDERS": True,
+    "ENABLE_TEMPLATE_PROCESSING": True
+}
+
 ALERT_REPORTS_NOTIFICATION_DRY_RUN = True
 WEBDRIVER_BASEURL = f"http://superset_app{os.environ.get('SUPERSET_APP_ROOT', '/')}/"  # When using docker compose baseurl should be http://superset_nginx{ENV{BASEPATH}}/  # noqa: E501
 # The base URL for the email report hyperlinks.
