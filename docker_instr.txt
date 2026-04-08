@@ -1,0 +1,1 @@
+https://superset-bi.ru/how-to-install-apache-superset-in-5-minutes-using-docker/

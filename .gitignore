@@ -1,0 +1,8 @@
+##Чтобы не пушить чувствительные данные и временные файлы
+
+echo ".env
+__pycache__/
+*.pyc
+.DS_Store
+superset_data/
+postgres_data/" > .gitignore
