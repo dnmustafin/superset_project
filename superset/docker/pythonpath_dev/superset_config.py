@@ -29,16 +29,17 @@ from flask_caching.backends.filesystemcache import FileSystemCache
 
 logger = logging.getLogger()
 
+# ============ НОВЫЕ JINJA ФУНКЦИИ ============
 def my_first_macro():
     from flask import session
-    x = session["locale"]
+    x = session.get("locale", "en")
     logger.info(f"session language is: {x}")
     return x
 
-JINJA_CONTEXT_ADDONS = {
-    'my_first_macro': my_first_macro,
-}
-
+def eq(a, b):
+    """Хелпер для сравнения в Handlebars"""
+    return a == b
+# =============================================
 
 DATABASE_DIALECT = os.getenv("DATABASE_DIALECT")
 DATABASE_USER = os.getenv("DATABASE_USER")
@@ -116,12 +117,13 @@ class CeleryConfig:
 
 CELERY_CONFIG = CeleryConfig
 
-# Исправленный блок FEATURE_FLAGS (без конфликта Git)
+# ============ ИСПРАВЛЕННЫЙ FEATURE_FLAGS (объединены оба набора) ============
 FEATURE_FLAGS = {
     "ALERT_REPORTS": True,
     "DATASET_FOLDERS": True,
     "ENABLE_TEMPLATE_PROCESSING": True
 }
+# ===========================================================================
 
 ALERT_REPORTS_NOTIFICATION_DRY_RUN = True
 WEBDRIVER_BASEURL = f"http://superset_app{os.environ.get('SUPERSET_APP_ROOT', '/')}/"  # When using docker compose baseurl should be http://superset_nginx{ENV{BASEPATH}}/  # noqa: E501
@@ -129,10 +131,49 @@ WEBDRIVER_BASEURL = f"http://superset_app{os.environ.get('SUPERSET_APP_ROOT', '/
 WEBDRIVER_BASEURL_USER_FRIENDLY = (
     f"http://localhost:8888/{os.environ.get('SUPERSET_APP_ROOT', '/')}/"
 )
+
+# ============ НОВЫЕ НАСТРОЙКИ ДЛЯ CSS/HTML (добавлены в конец) ============
+# Разрешаем HTML и расширяем схему санитизации
+HTML_SANITYZATION = True
+HTML_SANITIZATION_SCHEMA_EXTENSIONS = {
+    "attributes": {
+        "*": ["style", "class", "id", "name", "href", "title", "target", "width", "height"],
+        "td": ["colspan", "rowspan", "align", "valign"],
+        "th": ["colspan", "rowspan", "align", "valign"],
+        "table": ["class"],
+        "tr": ["class"],
+    },
+    "tagNames": [
+        "style", "ul", "ol", "li", "table", "tr", "td", "th", "thead", "tbody",
+        "div", "span", "p", "br", "hr", "strong", "b", "em", "i", "a", "img",
+        "h1", "h2", "h3", "h4"
+    ],
+}
+
+# Отключаем CSP для разработки (чтобы разрешить inline-стили)
+TALISMAN_ENABLED = False
+
+# Дополнительные настройки безопасности
+CSP_ENABLED = False
+CONTENT_SECURITY_POLICY = {
+    "default-src": ["*"],
+    "style-src": ["*", "'unsafe-inline'"],
+    "script-src": ["*", "'unsafe-inline'", "'unsafe-eval'"],
+    "img-src": ["*", "data:"],
+}
+# ==========================================================================
+
 SQLLAB_CTAS_NO_LIMIT = True
 
 log_level_text = os.getenv("SUPERSET_LOG_LEVEL", "INFO")
 LOG_LEVEL = getattr(logging, log_level_text.upper(), logging.INFO)
+
+# ============ НОВЫЕ JINJA ХЕЛПЕРЫ (добавлены в конец) ============
+JINJA_CONTEXT_ADDONS = {
+    'my_first_macro': my_first_macro,
+    'eq': eq,
+}
+# ================================================================
 
 if os.getenv("CYPRESS_CONFIG") == "true":
     # When running the service as a cypress backend, we need to import the config
